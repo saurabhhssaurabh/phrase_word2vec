@@ -1,0 +1,6 @@
+.vscode
+model/GoogleNews-vectors-negative300.bin.gz
+model/GoogleNews-vectors-negative300.bin
+model/model.bin
+*.pyc
+*~

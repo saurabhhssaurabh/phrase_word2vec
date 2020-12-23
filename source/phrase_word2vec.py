@@ -9,7 +9,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 class PhraseWord2VEC(object):
 
-    def __init__(self, min_count_=1, size_=300, iter_=5):
+    def __init__(self, min_count_=1, size_=300, iter_=1):
         self.kp = KeywordProcessor()
         self.model = Word2Vec(min_count=min_count_, size=size_, iter=iter_)
 

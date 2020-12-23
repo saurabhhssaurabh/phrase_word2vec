@@ -4,3 +4,4 @@ model/GoogleNews-vectors-negative300.bin
 model/model.bin
 *.pyc
 *~
+model

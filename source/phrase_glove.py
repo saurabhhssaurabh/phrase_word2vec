@@ -1,11 +1,14 @@
 from flashtext import KeywordProcessor
 from sklearn.feature_extraction.text import CountVectorizer
+from mittens.tf_mittens import Mittens
 
 import logging
 import gensim
 import csv
 import numpy as np
+# import sys
 
+# csv.field_size_limit(sys.maxsize)
 logging.getLogger().setLevel(logging.DEBUG)
 
 class PhraseGlove(object):
@@ -19,8 +22,18 @@ class PhraseGlove(object):
         self.pre_trained_glove_embeds = self.load_glove_file(pre_trained_glove_file)
 
     def load_glove_file(self, glove_file):
+        """
+            Read word vectors into a dictionary.
+
+            Arguments:
+            glove_file: str, path to input glove file.
+
+            Returns:
+            embed:  dict, word embedding dictionary.
+        """
+        logging.info("generating word vector dictionary")
         with open(glove_file, encoding='utf-8') as f:
-            reader = csv.reader(f, delimiter=' ')
+            reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
             embed = {line[0]: np.array(list(map(float, line[1:])))
                     for line in reader}
         return embed
@@ -54,33 +67,34 @@ class PhraseGlove(object):
                 if word not in self.pre_trained_glove_embeds.keys():
                     oov_word_set.add(word)
             
-
         return word_list, list(oov_word_set)
 
-def train(self, tag_set, sentence_list):
-        """
-           Main function to call to train word2vec on additional dataset.
+    def train(self, tag_set, sentence_list):
+            """
+            Main function to call to train word2vec on additional dataset.
 
-           Arguments:
-           tag_set:             set, set of keyword phrases
-           sentence_list:       list, list of abstract of papers
-           pre_trained_model:   string, path to pre_trained model
-           output_model_file:   string, path to save final model.
-        """
-        word_list, oov_word_list = self.pre_process(tag_set, sentence_list)
-        cv = CountVectorizer(ngram_range=(1,1), vocabulary=oov_word_list)
-        X = cv.fit_transform([' '.join(word_list)])
-        Xc = (X.T * X)
-        Xc.setdiag(0)
-        coocc_ar = Xc.toarray()
+            Arguments:
+            tag_set:             set, set of keyword phrases
+            sentence_list:       list, list of abstract of papers
+            """
+            word_list, oov_word_list = self.pre_process(tag_set, sentence_list)
 
+            logging.info("generating cooccurrence matrix...")
+            cv = CountVectorizer(ngram_range=(1,1), vocabulary=oov_word_list)
+            matrix = cv.fit_transform([' '.join(word_list)])
+            cooccur_matrix = (matrix.T * matrix)
+            cooccur_matrix.setdiag(0)
+            cooccur_matrix = cooccur_matrix.toarray()
+            
+            #starts training
+            logging.info("starting training...")
+            mittens_model = Mittens(n=50, max_iter=1000)
+            new_embeddings = mittens_model.fit(cooccur_matrix, vocab=oov_word_list,
+                initial_embedding_dict= self.pre_trained_glove_embeds)
 
-        self.model.build_vocab(train_data)
-        self.model.intersect_word2vec_format(pre_trained_model, binary=True, lockf=1.0)
-        logging.info("starting training...")
-        self.model.train(train_data, epochs=5, total_examples=self.model.corpus_count)
-        logging.info("training done...")
-        logging.info(f'saving model at : {output_model_file}')
-        self.model.wv.save_word2vec_format(output_model_file, binary=True)
-
-
+            logging.info("writing new embedding to file...")
+            #writes new embeddings to file.
+            with open(self.pre_trained_glove_file, 'a', newline='') as embed_file:
+                out_writer = csv.writer(embed_file, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
+                for i in range(len(oov_word_list)):
+                    out_writer.writerow([oov_word_list[i]] + list(new_embeddings[i]))

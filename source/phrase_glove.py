@@ -66,7 +66,8 @@ class PhraseGlove(object):
                 word_list.append(word)
                 if word not in self.pre_trained_glove_embeds.keys():
                     oov_word_set.add(word)
-            
+        
+        logging.info(f"number of oov words {len(oov_word_set)}")
         return word_list, list(oov_word_set)
 
     def train(self, tag_set, sentence_list):

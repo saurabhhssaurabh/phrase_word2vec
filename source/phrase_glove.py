@@ -25,7 +25,7 @@ class PhraseGlove(object):
 
     def create_output_glove_file(self):
         #writes new embeddings to file.
-        with open(self.output_file, 'x', newline='') as embed_file:
+        with open(self.output_file, 'w+', newline='', encoding="utf-8") as embed_file:
             out_writer = csv.writer(embed_file, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
             for key in self.pre_trained_glove_embeds.keys():
                 out_writer.writerow([key] + list(self.pre_trained_glove_embeds[key]))
@@ -100,11 +100,12 @@ class PhraseGlove(object):
             logging.info(f"total number of words in co-occurrence matrix: {len(cooccur_matrix)}")
             logging.info(f"vocab of co-occurrence matrix: ")
             logging.info(cv.vocabulary_)
+            vocab_ = list(dict(sorted(cv.vocabulary_.items(), key=lambda item: item[1])))
             
             #starts training
             logging.info("starting training...")
             mittens_model = Mittens(n=self.dimension, max_iter=self.epochs)
-            new_embeddings = mittens_model.fit(cooccur_matrix,
+            new_embeddings = mittens_model.fit(cooccur_matrix, vocab=vocab_,
                 initial_embedding_dict= self.pre_trained_glove_embeds)
             logging.info(f"total number of words in new_embeddings dictionary: {len(new_embeddings)}")
             tmp_dict = cv.vocabulary_.copy()

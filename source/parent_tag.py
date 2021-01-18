@@ -1,5 +1,6 @@
-import os
+import os, csv
 import pandas as pd
+import numpy as np
 
 root_dir = os.path.abspath(os.pardir)
 data_dir = os.path.join(root_dir, "data")
@@ -19,7 +20,7 @@ for tag in parent_tag_set:
     index = tag.find('-')
 
     if index > -1:
-        new_tag = tag.replace('-', ' ')
+        tag = tag.replace('-', ' ')
     
     parent_tag_list.append(tag.replace(' ', '_'))
 

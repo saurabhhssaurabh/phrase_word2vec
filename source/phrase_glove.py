@@ -37,8 +37,15 @@ class PhraseGlove(object):
             index = tag.find('(')
             if index > -1:
                 tag = tag[:index]
+            
             tag = tag.strip().lower()
-            tag_phrase_dict[tag.replace(' ', '_')] = [tag]
+
+            index = tag.find('-')
+            if index > -1:
+                new_tag = tag.replace('-', ' ')
+                tag_phrase_dict[new_tag.replace(' ', '_')] = [tag, new_tag]
+            else:
+                tag_phrase_dict[tag.replace(' ', '_')] = [tag]
 
         self.kp.add_keywords_from_dict(tag_phrase_dict)
 

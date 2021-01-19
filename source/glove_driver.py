@@ -14,13 +14,13 @@ glove_file = os.path.join(model_dir, "glove.txt")
 output_glove_file = os.path.join(model_dir, "output_glove.txt")
 
 start_time = time.time()
-tag_set = set(pd.read_csv(tag_table_file)['tag_text'].dropna().tolist())
-abstract_list = pd.read_csv(paper_table_file)['abstract'].dropna().tolist()[:1]
+tag_set = set(pd.read_csv(tag_table_file)['tag'].dropna().tolist())
+abstract_list = pd.read_csv(paper_table_file)['abstract'].dropna().tolist()
 
 obj = PhraseGlove(pre_trained_glove_file=glove_file, tag_set=tag_set, output_file=output_glove_file)
 
 start_index = 0
-num_sents = 10000
+num_sents = 1000
 if num_sents > len(abstract_list):
     end_index = len(abstract_list)
 else:

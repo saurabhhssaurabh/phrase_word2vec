@@ -1,5 +1,6 @@
-import os, csv
+import os
 import pandas as pd
+import csv
 import numpy as np
 
 root_dir = os.path.abspath(os.pardir)
